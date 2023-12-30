@@ -17,7 +17,7 @@ function organizarEnGoogleTasks() {
     // Recorrer los valores de la matriz, comenzando desde la fila 6
     for (var rowIndex = 1; rowIndex < dataValues.length; rowIndex++) {
       var row = dataValues[rowIndex];
-      
+
       // Obtener índices de las columnas
       var clienteIndex = headerRow.indexOf("Cliente");
       var fechaCompromisoIndex = headerRow.indexOf("Fecha");
@@ -41,20 +41,48 @@ function organizarEnGoogleTasks() {
             due: fechaFormateada // Fecha de compromiso formateada
           };
 
+          // Agregar declaraciones Logger.log para verificar cada combinación
+          Logger.log("Cliente en " + headerRow[clienteIndex] + (rowIndex + 5) + ": " + cliente);
+          Logger.log("Fecha en " + headerRow[fechaCompromisoIndex] + (rowIndex + 5) + ": " + fechaCompromiso);
+          Logger.log("Descripción en " + headerRow[descripcionTareaIndex] + (rowIndex + 5) + ": " + descripcionTarea);
+
           // Agregar la tarea al array
           tasks.push(tarea);
-        } else {
-          // Registro de depuración para entender por qué no se crea la tarea
-          console.log("Fila " + (rowIndex + 5) + ": Datos insuficientes para crear la tarea.");
         }
-      } else {
-        // Registro de depuración si no se encuentran encabezados
-        console.log("No se encontraron encabezados en la fila " + (rowIndex + 1));
       }
     }
 
-    // Resto del código permanece igual...
+    // Verificar si hay tareas para agregar
+    if (tasks.length > 0) {
+      // Obtener la lista de tareas existente
+      var taskList = obtenerListaDeTareas();
 
+      // Si no se encuentra, crear la lista
+      if (!taskList) {
+        taskList = crearListaDeTareas();
+      }
+
+      // Obtener títulos de tareas existentes
+      var existingTitles = taskList.tasks.map(function (existingTask) {
+        return existingTask.title;
+      });
+
+      // Filtrar tareas que no existen en la lista
+      var nuevasTareas = tasks.filter(function (task) {
+        return !existingTitles.includes(task.title);
+      });
+
+      // Insertar las nuevas tareas en la lista
+      if (nuevasTareas.length > 0) {
+        Tasks.Tasks.insertAll(taskList.id, nuevasTareas);
+        console.log("Se insertaron nuevas tareas.");
+      } else {
+        console.log("No hay tareas nuevas para insertar.");
+      }
+    } else {
+      // Registro de depuración para ninguna tarea para agregar
+      console.log("No hay tareas para agregar.");
+    }
   } catch (error) {
     console.error("Error en la ejecución de organizarEnGoogleTasks:", error);
   }
