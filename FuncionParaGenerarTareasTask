@@ -1,0 +1,61 @@
+function organizarEnGoogleTasks() {
+  try {
+    // Obtener la hoja activa
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = spreadsheet.getActiveSheet();
+
+    // Obtener los datos del rango utilizado en la hoja de cálculo
+    var dataRange = sheet.getRange("E5:R49");
+    var dataValues = dataRange.getValues();
+
+    // Crear un objeto para almacenar las tareas
+    var tasks = [];
+
+    // Obtener la fila de encabezados para identificar las columnas
+    var headerRow = dataValues[0];
+
+    // Recorrer los valores de la matriz, comenzando desde la fila 6
+    for (var rowIndex = 1; rowIndex < dataValues.length; rowIndex++) {
+      var row = dataValues[rowIndex];
+      
+      // Obtener índices de las columnas
+      var clienteIndex = headerRow.indexOf("Cliente");
+      var fechaCompromisoIndex = headerRow.indexOf("Fecha");
+      var descripcionTareaIndex = headerRow.indexOf("Descripción");
+
+      // Verificar si hay un cliente, fecha y descripción en las celdas específicas
+      if (clienteIndex !== -1 && fechaCompromisoIndex !== -1 && descripcionTareaIndex !== -1) {
+        var cliente = row[clienteIndex];
+        var fechaCompromiso = row[fechaCompromisoIndex];
+        var descripcionTarea = row[descripcionTareaIndex];
+
+        // Verificar si hay datos en las celdas
+        if (cliente && fechaCompromiso && descripcionTarea) {
+          // Formatear la fecha como cadena UTC
+          var fechaFormateada = formatearFecha(fechaCompromiso);
+
+          // Crear una tarea
+          var tarea = {
+            title: cliente, // Título de la tarea como nombre del cliente
+            notes: descripcionTarea, // Detalles de la tarea como descripción
+            due: fechaFormateada // Fecha de compromiso formateada
+          };
+
+          // Agregar la tarea al array
+          tasks.push(tarea);
+        } else {
+          // Registro de depuración para entender por qué no se crea la tarea
+          console.log("Fila " + (rowIndex + 5) + ": Datos insuficientes para crear la tarea.");
+        }
+      } else {
+        // Registro de depuración si no se encuentran encabezados
+        console.log("No se encontraron encabezados en la fila " + (rowIndex + 1));
+      }
+    }
+
+    // Resto del código permanece igual...
+
+  } catch (error) {
+    console.error("Error en la ejecución de organizarEnGoogleTasks:", error);
+  }
+}
